@@ -16,8 +16,8 @@ const fetchMyIP = (callback) => {
 
 
     const ip = JSON.parse(body).ip
-    
-    return callback(null, ip);
+   
+    return callback(null, ip); 
   })
 }
 
@@ -27,12 +27,12 @@ const fetchCoordsByIP = (ip, callback) => {
 
   request(`https://freegeoip.app/json/${ip}`, (error, responce, body) => {
     if (error){
-      callback(error, null);
+      console.log(error, null);
       return;
     }
     if (responce.statusCode !== 200) {
       const msg = `Status Code ${responce.statusCode} when fetching Coordinants. Response: ${body}`;
-      callback(Error(msg), null);
+      console.log(Error(msg), null);
       return;
     }
     let latitude = JSON.parse(body).latitude;
@@ -65,6 +65,35 @@ const fetchISSFlyOverTimes = (coords, callback) => {
   })
 }
 
+const nextISSTimesForMyLocation = (callback) => {
+
+  fetchMyIP((error, ip) => {
+      if (error) {
+        console.log("It didn't work!" , error);
+        return;
+      }
+
+      fetchCoordsByIP(ip, (error, obj) => {
+        if (error) {
+          console.log("It didn't work!" , error);
+          return;
+        }
+
+        fetchISSFlyOverTimes({ latitude: '43.6547', longitude: '-79.3623' }, (error, fly) => {
+            if (error) {
+              console.log("It didn't work!" , error);
+              return;
+            }
+
+            callback(null, fly);
+
+      });
+
+    });
+
+  });
+
+};
 
 
-module.exports = {fetchMyIP, fetchCoordsByIP, fetchISSFlyOverTimes};
+module.exports = {nextISSTimesForMyLocation};
